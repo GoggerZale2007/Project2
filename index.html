@@ -1,1 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Learn Guitar HTML</title>
+    <style>
+        :root { --wood: #5d3a1a; --string: #e0e0e0; }
+        body { background: #121212; color: white; font-family: 'Segoe UI', sans-serif; margin: 0; overflow: hidden; touch-action: none; text-align: center; }
+        
+        .header { padding: 15px; background: #222; border-bottom: 2px solid #444; }
+        
+        /* The Fretboard Container */
+        .fretboard {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr); /* 6 Strings */
+            grid-template-rows: repeat(5, 1fr);    /* 5 Frets visible */
+            width: 100vw;
+            height: 80vh;
+            background: var(--wood);
+            position: relative;
+        }
 
+        /* Fret wires (horizontal lines) */
+        .fret-wire {
+            position: absolute;
+            width: 100%;
+            height: 4px;
+            background: #aaa;
+            box-shadow: 0 2px 2px rgba(0,0,0,0.5);
+            z-index: 1;
+        }
+
+        /* Individual "Notes" (The hitboxes) */
+        .note-box {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        /* The String visual (vertical line) */
+        .note-box::after {
+            content: '';
+            position: absolute;
+            width: 2px;
+            height: 100%;
+            background: var(--string);
+            box-shadow: 1px 0 3px black;
+        }
+
+        /* Note Label */
+        .label {
+            font-size: 12px;
+            background: rgba(0,0,0,0.6);
+            padding: 2px 5px;
+            border-radius: 10px;
+            opacity: 0.7;
+            z-index: 3;
+        }
+
+        .active { background: rgba(255, 255, 255, 0.2); transform: scale(1.1); }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h2 style="margin:0">Guitar Fret Map</h2>
+    <p style="font-size: 12px; margin:5px">Swipe to play • Columns = Strings • Rows = Frets</p>
+</div>
+
+<div class="fretboard" id="fretboard">
+    </div>
+
+<audio id="s1" src="https://freesound.org/data/previews/411/411461_5121236-lq.mp3"></audio>
+<audio id="s2" src="https://freesound.org/data/previews/411/411460_5121236-lq.mp3"></audio>
+<audio id="s3" src="https://freesound.org/data/previews/411/411459_5121236-lq.mp3"></audio>
+<audio id="s4" src="https://freesound.org/data/previews/411/411458_5121236-lq.mp3"></audio>
+<audio id="s5" src="https://freesound.org/data/previews/411/411457_5121236-lq.mp3"></audio>
+<audio id="s6" src="https://freesound.org/data/previews/411/411456_5121236-lq.mp3"></audio>
+
+<script>
+    const board = document.getElementById('fretboard');
+    const strings = ['E', 'A', 'D', 'G', 'B', 'E'];
+    const frets = 5;
+
+    // Create Fret Wires
+    for(let i=0; i<=frets; i++) {
+        let wire = document.createElement('div');
+        wire.className = 'fret-wire';
+        wire.style.top = (i * 20) + '%';
+        board.appendChild(wire);
+    }
+
+    // Create Note Hitboxes
+    for(let f=0; f<frets; f++) {
+        for(let s=0; s<6; s++) {
+            let box = document.createElement('div');
+            box.className = 'note-box';
+            box.dataset.string = s + 1;
+            
+            let label = document.createElement('span');
+            label.className = 'label';
+            label.innerText = strings[s] + (f === 0 ? '' : ' +'+f);
+            
+            box.appendChild(label);
+            board.appendChild(box);
+        }
+    }
+
+    let lastNote = null;
+
+    // Mobile Swipe Logic
+    document.addEventListener('touchmove', (e) => {
+        let touch = e.touches[0];
+        let el = document.elementFromPoint(touch.clientX, touch.clientY);
+        let target = el?.closest('.note-box');
+
+        if (target && target !== lastNote) {
+            playString(target.dataset.string);
+            visualFeedback(target);
+            lastNote = target;
+        }
+    });
+
+    document.addEventListener('touchend', () => lastNote = null);
+
+    function playString(id) {
+        let audio = document.getElementById('s' + id);
+        if(audio) {
+            audio.currentTime = 0;
+            audio.play();
+        }
+    }
+
+    function visualFeedback(el) {
+        el.classList.add('active');
+        setTimeout(() => el.classList.remove('active'), 200);
+    }
+</script>
+
+</body>
+  </html>
+  
