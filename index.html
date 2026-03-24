@@ -3,144 +3,91 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Learn Guitar HTML</title>
+    <title>Code-Generated Guitar</title>
     <style>
-        :root { --wood: #5d3a1a; --string: #e0e0e0; }
-        body { background: #121212; color: white; font-family: 'Segoe UI', sans-serif; margin: 0; overflow: hidden; touch-action: none; text-align: center; }
-        
-        .header { padding: 15px; background: #222; border-bottom: 2px solid #444; }
-        
-        /* The Fretboard Container */
-        .fretboard {
-            display: grid;
-            grid-template-columns: repeat(6, 1fr); /* 6 Strings */
-            grid-template-rows: repeat(5, 1fr);    /* 5 Frets visible */
-            width: 100vw;
-            height: 80vh;
-            background: var(--wood);
-            position: relative;
+        body { 
+            background: #1a1a1a; margin: 0; height: 100vh; 
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            font-family: sans-serif; touch-action: none; overflow: hidden;
         }
-
-        /* Fret wires (horizontal lines) */
+        #fretboard {
+            width: 90vw; height: 70vh;
+            background: #3d2410; border: 4px solid #222;
+            display: flex; flex-direction: column; justify-content: space-around;
+            position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        .string {
+            width: 100%; height: 15%; display: flex; align-items: center;
+            position: relative; z-index: 2;
+        }
+        /* Visual string line */
+        .line {
+            width: 100%; background: #ddd; 
+            box-shadow: 0 2px 2px rgba(0,0,0,0.8);
+            pointer-events: none;
+        }
         .fret-wire {
-            position: absolute;
-            width: 100%;
-            height: 4px;
-            background: #aaa;
-            box-shadow: 0 2px 2px rgba(0,0,0,0.5);
-            z-index: 1;
+            position: absolute; top: 0; bottom: 0; width: 2px;
+            background: silver; z-index: 1;
         }
-
-        /* Individual "Notes" (The hitboxes) */
-        .note-box {
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 2;
-            border: 1px solid rgba(255,255,255,0.05);
-        }
-
-        /* The String visual (vertical line) */
-        .note-box::after {
-            content: '';
-            position: absolute;
-            width: 2px;
-            height: 100%;
-            background: var(--string);
-            box-shadow: 1px 0 3px black;
-        }
-
-        /* Note Label */
-        .label {
-            font-size: 12px;
-            background: rgba(0,0,0,0.6);
-            padding: 2px 5px;
-            border-radius: 10px;
-            opacity: 0.7;
-            z-index: 3;
-        }
-
-        .active { background: rgba(255, 255, 255, 0.2); transform: scale(1.1); }
+        .active { filter: brightness(2); transform: scaleY(1.2); transition: 0.1s; }
+        .controls { color: #888; margin-bottom: 10px; font-size: 14px; }
     </style>
 </head>
 <body>
 
-<div class="header">
-    <h2 style="margin:0">Guitar Fret Map</h2>
-    <p style="font-size: 12px; margin:5px">Swipe to play • Columns = Strings • Rows = Frets</p>
-</div>
+    <div class="controls">Landscape Mode: Swipe the strings to generate sound via code</div>
 
-<div class="fretboard" id="fretboard">
-    </div>
+    <div id="fretboard">
+        <div class="fret-wire" style="left: 25%"></div>
+        <div class="fret-wire" style="left: 50%"></div>
+        <div class="fret-wire" style="left: 75%"></div>
 
-<audio id="s1" src="https://freesound.org/data/previews/411/411461_5121236-lq.mp3"></audio>
-<audio id="s2" src="https://freesound.org/data/previews/411/411460_5121236-lq.mp3"></audio>
-<audio id="s3" src="https://freesound.org/data/previews/411/411459_5121236-lq.mp3"></audio>
-<audio id="s4" src="https://freesound.org/data/previews/411/411458_5121236-lq.mp3"></audio>
-<audio id="s5" src="https://freesound.org/data/previews/411/411457_5121236-lq.mp3"></audio>
-<audio id="s6" src="https://freesound.org/data/previews/411/411456_5121236-lq.mp3"></audio>
+        <div class="string" data-hz="329.63"><div class="line" style="height:1px"></div></div> <div class="string" data-hz="246.94"><div class="line" style="height:2px"></div></div> <div class="string" data-hz="196.00"><div class="line" style="height:3px"></div></div> <div class="string" data-hz="146.83"><div class="line" style="height:4px"></div></div> <div class="string" data-hz="110.00"><div class="line" style="height:5px"></div></div> <div class="string" data-hz="82.41"> <div class="line" style="height:6px"></div></div> </div>
 
-<script>
-    const board = document.getElementById('fretboard');
-    const strings = ['E', 'A', 'D', 'G', 'B', 'E'];
-    const frets = 5;
+    <script>
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        let lastString = null;
 
-    // Create Fret Wires
-    for(let i=0; i<=frets; i++) {
-        let wire = document.createElement('div');
-        wire.className = 'fret-wire';
-        wire.style.top = (i * 20) + '%';
-        board.appendChild(wire);
-    }
+        // Function to create sound using code (Oscillators)
+        function playNote(frequency) {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
 
-    // Create Note Hitboxes
-    for(let f=0; f<frets; f++) {
-        for(let s=0; s<6; s++) {
-            let box = document.createElement('div');
-            box.className = 'note-box';
-            box.dataset.string = s + 1;
-            
-            let label = document.createElement('span');
-            label.className = 'label';
-            label.innerText = strings[s] + (f === 0 ? '' : ' +'+f);
-            
-            box.appendChild(label);
-            board.appendChild(box);
+            // 'triangle' sounds more like an acoustic guitar than 'sine' or 'square'
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(frequency, audioCtx.currentTime);
+
+            // Create a "Pluck" envelope (loud start, quick fade)
+            gain.gain.setValueAtTime(0.5, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 1.5);
+
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            osc.start();
+            osc.stop(audioCtx.currentTime + 1.5);
         }
-    }
 
-    let lastNote = null;
+        // Touch interaction logic
+        document.addEventListener('touchmove', (e) => {
+            const touch = e.touches[0];
+            const target = document.elementFromPoint(touch.clientX, touch.clientY);
+            const stringEl = target?.closest('.string');
 
-    // Mobile Swipe Logic
-    document.addEventListener('touchmove', (e) => {
-        let touch = e.touches[0];
-        let el = document.elementFromPoint(touch.clientX, touch.clientY);
-        let target = el?.closest('.note-box');
+            if (stringEl && stringEl !== lastString) {
+                // Resume audio context (browsers block sound until first touch)
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                
+                playNote(parseFloat(stringEl.dataset.hz));
+                
+                stringEl.classList.add('active');
+                setTimeout(() => stringEl.classList.remove('active'), 100);
+                lastString = stringEl;
+            }
+        });
 
-        if (target && target !== lastNote) {
-            playString(target.dataset.string);
-            visualFeedback(target);
-            lastNote = target;
-        }
-    });
-
-    document.addEventListener('touchend', () => lastNote = null);
-
-    function playString(id) {
-        let audio = document.getElementById('s' + id);
-        if(audio) {
-            audio.currentTime = 0;
-            audio.play();
-        }
-    }
-
-    function visualFeedback(el) {
-        el.classList.add('active');
-        setTimeout(() => el.classList.remove('active'), 200);
-    }
-</script>
-
+        document.addEventListener('touchend', () => { lastString = null; });
+    </script>
 </body>
-  </html>
-  
+</html>
