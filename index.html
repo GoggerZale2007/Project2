@@ -5,276 +5,216 @@
     <title>CalcOS</title>
     <style>
         :root {
-            --bg: #1a1a1b;
             --case: #232526;
-            --lcd-on: #b8c4b1;
-            --lcd-off: #050505;
+            --lcd: #b8c4b1;
+            --pixel: #1a1a1a;
             --k-fn: #333;
             --k-num: #eee;
             --k-act: #48a88d;
             --k-pwr: #b02a37;
-            --text: #1a1a1a;
         }
 
         body {
-            background: var(--bg);
+            background: #111;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
             margin: 0;
             font-family: 'Courier New', Courier, monospace;
-            overflow: hidden;
             user-select: none;
         }
 
         .calc {
             background: var(--case);
-            width: 330px;
+            width: 340px;
             padding: 25px;
             border-radius: 20px;
-            box-shadow: 0 12px 0 #000, 0 20px 50px rgba(0,0,0,0.7);
+            box-shadow: 0 10px 0 #000, 0 20px 40px rgba(0,0,0,0.8);
         }
 
         #lcd {
-            background: var(--lcd-off);
-            height: 160px;
-            border-radius: 6px;
+            background: #050505;
+            height: 180px;
+            border-radius: 4px;
             border: 4px solid #111;
-            margin-bottom: 25px;
-            padding: 10px;
-            color: var(--text);
+            margin-bottom: 20px;
+            padding: 15px;
+            color: var(--pixel);
             display: flex;
             flex-direction: column;
             position: relative;
-            overflow: hidden;
             transition: background 0.2s;
         }
 
-        #lcd.active { background: var(--lcd-on); }
+        #lcd.active { background: var(--lcd); }
 
-        .pixel { font-size: 8px; line-height: 1; white-space: pre; font-weight: bold; margin: 5px auto; }
-        
-        .loader {
-            width: 18px; height: 18px; border: 3px dotted var(--text); border-radius: 50%;
-            animation: spin 0.8s steps(8) infinite; margin: 10px auto;
+        /* MINECRAFT PIXEL LOADER (NO TEXT) */
+        .mc-loader {
+            width: 6px;
+            height: 6px;
+            background: transparent;
+            margin: 30px auto;
+            animation: mc-spin 1s steps(8) infinite;
         }
-        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
-        #scr-top { font-size: 11px; height: 15px; display: flex; gap: 5px; font-weight: bold; }
-        #scr-main { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; font-size: 14px; }
-        #scr-input { width: 100%; text-align: right; font-size: 22px; padding-top: 20px; }
-
-        .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
-        
-        button {
-            height: 46px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;
-            box-shadow: 0 4px 0 #111; transition: 0.05s; outline: none;
+        @keyframes mc-spin {
+            0% { box-shadow: 0 -12px var(--pixel), 8px -8px #777, 12px 0 #777, 8px 8px #777, 0 12px #777, -8px 8px #777, -12px 0 #777, -8px -8px #777; }
+            12.5% { box-shadow: 0 -12px #777, 8px -8px var(--pixel), 12px 0 #777, 8px 8px #777, 0 12px #777, -8px 8px #777, -12px 0 #777, -8px -8px #777; }
+            25% { box-shadow: 0 -12px #777, 8px -8px #777, 12px 0 var(--pixel), 8px 8px #777, 0 12px #777, -8px 8px #777, -12px 0 #777, -8px -8px #777; }
+            37.5% { box-shadow: 0 -12px #777, 8px -8px #777, 12px 0 #777, 8px 8px var(--pixel), 0 12px #777, -8px 8px #777, -12px 0 #777, -8px -8px #777; }
+            50% { box-shadow: 0 -12px #777, 8px -8px #777, 12px 0 #777, 8px 8px #777, 0 12px var(--pixel), -8px 8px #777, -12px 0 #777, -8px -8px #777; }
+            62.5% { box-shadow: 0 -12px #777, 8px -8px #777, 12px 0 #777, 8px 8px #777, 0 12px #777, -8px 8px var(--pixel), -12px 0 #777, -8px -8px #777; }
+            75% { box-shadow: 0 -12px #777, 8px -8px #777, 12px 0 #777, 8px 8px #777, 0 12px #777, -8px 8px #777, -12px 0 var(--pixel), -8px -8px #777; }
+            87.5% { box-shadow: 0 -12px #777, 8px -8px #777, 12px 0 #777, 8px 8px #777, 0 12px #777, -8px 8px #777, -12px 0 #777, -8px -8px var(--pixel); }
+            100% { box-shadow: 0 -12px var(--pixel), 8px -8px #777, 12px 0 #777, 8px 8px #777, 0 12px #777, -8px 8px #777, -12px 0 #777, -8px -8px #777; }
         }
-        button:active { transform: translateY(3px); box-shadow: 0 1px 0 #111; }
 
+        /* CSS ICON ENGINE */
+        .icon-px {
+            width: 4px; height: 4px;
+            background: transparent;
+            margin: 15px auto;
+        }
+
+        .icon-install {
+            box-shadow: 
+                0 0 var(--pixel), 4px 0 var(--pixel), 8px 0 var(--pixel), 12px 0 var(--pixel), 16px 0 var(--pixel),
+                0 4px var(--pixel), 16px 4px var(--pixel), 24px 4px var(--pixel),
+                0 8px var(--pixel), 4px 8px var(--pixel), 8px 8px var(--pixel), 12px 8px var(--pixel), 16px 8px var(--pixel), 20px 8px var(--pixel), 24px 8px var(--pixel), 28px 8px var(--pixel),
+                0 12px var(--pixel), 16px 12px var(--pixel), 24px 12px var(--pixel),
+                0 16px var(--pixel), 4px 16px var(--pixel), 8px 16px var(--pixel), 12px 16px var(--pixel), 16px 16px var(--pixel), 24px 16px var(--pixel);
+        }
+
+        .icon-off {
+            box-shadow: 
+                8px 0 var(--pixel),
+                4px 4px var(--pixel), 12px 4px var(--pixel),
+                0 8px var(--pixel), 16px 8px var(--pixel),
+                4px 12px var(--pixel), 8px 12px var(--pixel), 12px 12px var(--pixel);
+        }
+
+        #scr-m { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
+        #scr-i { width: 100%; text-align: right; font-size: 28px; min-height: 40px; font-weight: bold; margin-top: 10px; }
+
+        .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 10px; }
+        button { height: 44px; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 0 #000; transition: 0.1s; }
+        button:active { transform: translateY(2px); box-shadow: 0 1px 0 #000; }
         .f { background: var(--k-fn); color: white; font-size: 10px; }
         .n { background: var(--k-num); color: #000; font-size: 18px; }
         .a { background: var(--k-act); color: white; }
         .p { background: var(--k-pwr); color: white; }
-
-        .err { font-weight: bold; font-size: 13px; }
-        .err-btns { font-size: 10px; margin-top: 10px; }
     </style>
 </head>
 <body>
 
     <div class="calc">
         <div id="lcd">
-            <div id="scr-top"><span id="ind-s" style="display:none">S</span><span id="ind-m" style="display:none">M</span></div>
-            <div id="scr-main"></div>
-            <div id="scr-input"></div>
+            <div id="scr-m"></div>
+            <div id="scr-i"></div>
         </div>
 
         <div class="grid">
-            <button class="f" onclick="btn('shift')" style="color:#f1c40f">SHIFT</button>
+            <button class="f" onclick="btn('shf')">SHIFT</button>
             <button class="f" onclick="btn('menu')">MENU</button>
             <button class="f" onclick="btn('left')">◀</button>
-            <button class="f" onclick="btn('right')">▶</button>
-            
-            <button class="n" onclick="num(7)">7</button>
-            <button class="n" onclick="num(8)">8</button>
-            <button class="n" onclick="num(9)">9</button>
+            <button class="p" onclick="btn('on')">ON</button>
+        </div>
+
+        <div class="grid">
+            <button class="n" onclick="add('7')">7</button>
+            <button class="n" onclick="add('8')">8</button>
+            <button class="n" onclick="add('9')">9</button>
             <button class="a" onclick="btn('del')">DEL</button>
             
-            <button class="n" onclick="num(4)">4</button>
-            <button class="n" onclick="num(5)">5</button>
-            <button class="n" onclick="num(6)">6</button>
+            <button class="n" onclick="add('4')">4</button>
+            <button class="n" onclick="add('5')">5</button>
+            <button class="n" onclick="add('6')">6</button>
             <button class="a" onclick="btn('ac')">AC</button>
             
-            <button class="n" onclick="num(1)">1</button>
-            <button class="n" onclick="num(2)">2</button>
-            <button class="n" onclick="num(3)">3</button>
-            <button class="p" onclick="btn('on')">ON</button>
+            <button class="n" onclick="add('1')">1</button>
+            <button class="n" onclick="add('2')">2</button>
+            <button class="n" onclick="add('3')">3</button>
+            <button class="n" onclick="add('*')">×</button>
 
-            <button class="n" onclick="num(0)">0</button>
-            <button class="n" onclick="num('.')">.</button>
-            <button class="n" onclick="btn('ans')">Ans</button>
-            <button class="n" onclick="btn('exec')">=</button>
+            <button class="n" onclick="add('0')">0</button>
+            <button class="n" onclick="add('.')">.</button>
+            <button class="n" onclick="add('/')">÷</button>
+            <button class="n" onclick="btn('exe')">=</button>
         </div>
     </div>
 
     <script>
-        const state = { pwr: false, inst: false, mode: "OFF", shf: false, logs: [], input: "" };
+        const st = { on: false, ok: false, mode: "OFF", val: "" };
         const lcd = document.getElementById('lcd');
-        const main = document.getElementById('scr-main');
-        const inputScr = document.getElementById('scr-input');
-        const indS = document.getElementById('ind-s');
-
-        const icons = {
-            install: ` ■■■■■   ■ \n ■   ■  ■■■\n ■■■■■   ■ \n ■   ■   ■ \n ■■■■■   ■ `,
-            off: `   ■   \n ■ ■ ■ \n ■   ■ \n  ■■■  `,
-            error: ` ! ! ! \n  ! !  \n   !   `
-        };
-
-        function log(m) {
-            state.logs.push(`> ${m}`);
-            if (state.logs.length > 5) state.logs.shift();
-        }
+        const m = document.getElementById('scr-m');
+        const i = document.getElementById('scr-i');
 
         function btn(t) {
             if (t === 'on') {
-                if (state.pwr) return;
-                state.pwr = true;
-                lcd.classList.add('active');
-                log("PWR_ON");
-                showBoot();
+                if (st.on) return;
+                st.on = true; lcd.classList.add('active'); boot();
                 return;
             }
-
-            if (!state.pwr) return;
-
-            if (t === 'shift') {
-                state.shf = !state.shf;
-                indS.style.display = state.shf ? "block" : "none";
-                return;
-            }
-
-            if (state.mode === "ERROR") {
-                if (t === 'ac') { resetToCalc(); }
-                if (t === 'left' || t === 'right') { resetToCalc(); }
-                return;
-            }
-
-            if (t === 'ac') {
-                if (!state.inst) { showBoot(); }
-                else { resetToCalc(); }
-            }
-
-            if (t === 'del') {
-                if (state.mode === "CALC" && state.input.length > 0) {
-                    state.input = state.input.slice(0, -1);
-                    renderCalc();
+            if (!st.on) return;
+            if (st.mode === "ERR" && (t === 'ac' || t === 'left')) { st.mode = "CALC"; render(); return; }
+            if (t === 'ac') { if (!st.ok) boot(); else { st.val = ""; render(); } }
+            if (t === 'del') { st.val = st.val.slice(0, -1); render(); }
+            if (t === 'exe') {
+                try {
+                    if (st.val.includes("/0")) throw "Math ERROR";
+                    let res = eval(st.val);
+                    st.val = res.toString();
+                    render();
+                } catch(e) {
+                    st.mode = "ERR";
+                    m.innerHTML = `<div style="font-weight:bold">${e === "Math ERROR" ? e : "Syntax ERROR"}</div><div style="font-size:10px; margin-top:10px">[AC]:Cancel [◀]:Move</div>`;
+                    i.innerText = "";
                 }
             }
-
-            if (t === 'menu') {
-                if (!state.inst) return;
-                if (state.shf) showSetup();
-                else showModes();
-                state.shf = false;
-                indS.style.display = "none";
-            }
-
-            if (t === 'exec') {
-                if (state.mode === "CALC") processEval();
-            }
         }
 
-        function num(v) {
-            if (!state.pwr) return;
-            if (state.mode === "BOOT") {
-                if (v === 1) runInstall();
-                if (v === 2) shutDown();
-            } else if (state.mode === "SETUP" && v === 4) {
-                showLogs();
-            } else if (state.mode === "CALC") {
-                state.input += v.toString();
-                renderCalc();
+        function add(v) {
+            if (!st.on) return;
+            if (st.mode === "BOOT") {
+                if (v === '1') install();
+                if (v === '2') shut();
+            } else if (st.mode === "CALC") {
+                st.val += v;
+                render();
             }
         }
 
-        function showBoot() {
-            state.mode = "BOOT";
-            inputScr.innerText = "";
-            main.innerHTML = `CalcOS v1.0<br>BOOTLOADER<br><br>1:INSTALL 2:OFF`;
+        function boot() {
+            st.mode = "BOOT"; i.innerText = "";
+            m.innerHTML = `<div style="font-size:12px; font-weight:bold">CalcOS BOOTLOADER</div><br>1:INSTALL  2:OFF`;
         }
 
-        function runInstall() {
-            state.mode = "BUSY";
-            main.innerHTML = `<div class="pixel">${icons.install}</div>INIT...`;
+        function install() {
+            st.mode = "BUSY";
+            m.innerHTML = `<div class="icon-px icon-install"></div>DISK_FORMAT`;
             setTimeout(() => {
                 let p = 0;
-                const i = setInterval(() => {
+                const inv = setInterval(() => {
                     p += 20;
-                    main.innerHTML = `<div class="loader"></div>INSTALLING<br>${p}%`;
+                    m.innerHTML = `<div class="mc-loader"></div>INSTALLING ${p}%`;
                     if (p >= 100) {
-                        clearInterval(i);
-                        state.inst = true;
-                        state.mode = "CALC";
-                        main.innerHTML = "OS READY<br>PRESS AC";
-                        log("INST_OK");
+                        clearInterval(inv);
+                        st.ok = true; st.mode = "CALC";
+                        m.innerHTML = "OS SUCCESS<br>PRESS AC";
                     }
-                }, 500);
+                }, 600);
             }, 800);
         }
 
-        function processEval() {
-            try {
-                if (state.input.includes("/0")) throw "Math ERROR";
-                if (state.input === "") return;
-                let res = eval(state.input);
-                state.input = res.toString();
-                renderCalc();
-            } catch (e) {
-                showError(e === "Math ERROR" ? "Math ERROR" : "Syntax ERROR");
-            }
-        }
+        function render() { m.innerHTML = ""; i.innerText = st.val || "0"; }
 
-        function showError(msg) {
-            state.mode = "ERROR";
-            inputScr.innerText = "";
-            main.innerHTML = `<div class="err">${msg}</div><div class="err-btns">[AC]:Cancel<br>[◀][▶]:Goto</div>`;
-            log("ERR_" + msg.split(' ')[0]);
-        }
-
-        function resetToCalc() {
-            state.mode = "CALC";
-            if (state.input === "") state.input = "";
-            main.innerHTML = "";
-            renderCalc();
-        }
-
-        function renderCalc() {
-            inputScr.innerText = state.input || "0";
-        }
-
-        function showSetup() {
-            state.mode = "SETUP";
-            inputScr.innerText = "";
-            main.innerHTML = `[SETUP]<br>1:I/O 2:Disp<br>3:Mode 4:LOGS`;
-        }
-
-        function showLogs() {
-            main.innerHTML = `<div style="font-size:9px;text-align:left">${state.logs.join('<br>')}</div>`;
-        }
-
-        function shutDown() {
-            state.pwr = false;
-            state.mode = "OFF";
-            main.innerHTML = `<div class="pixel">${icons.off}</div>BYE`;
-            inputScr.innerText = "";
-            setTimeout(() => {
-                lcd.classList.remove('active');
-                main.innerHTML = "";
-            }, 1000);
+        function shut() {
+            st.on = false; st.mode = "OFF";
+            m.innerHTML = `<div class="icon-px icon-off" style="margin-left:45%"></div>BYE`;
+            i.innerText = "";
+            setTimeout(() => { lcd.classList.remove('active'); m.innerHTML = ""; }, 1000);
         }
     </script>
 </body>
-              </html>
-  
+</html>
